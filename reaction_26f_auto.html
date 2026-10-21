@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>26F REACTION TEST</title>
+<style>
+*{box-sizing:border-box}
+html,body{margin:0;width:100%;height:100%;overflow:hidden;background:#080808;color:#fff;font-family:Arial,"Segoe UI",sans-serif;user-select:none}
+body{display:flex;align-items:center;justify-content:center}
+#game{width:min(900px,94vw);height:min(650px,92vh);background:#111;border:2px solid #333;border-radius:18px;overflow:hidden;position:relative;box-shadow:0 0 50px #000}
+#hud{height:76px;border-bottom:1px solid #333;display:flex;align-items:center;justify-content:space-around;background:#0d0d0d}
+.stat{text-align:center;min-width:130px}.label{font-size:11px;color:#777;letter-spacing:2px}.value{font-size:24px;margin-top:3px}
+#arena{height:calc(100% - 76px);display:flex;flex-direction:column;align-items:center;justify-content:center}
+#message{font-size:clamp(52px,10vw,110px);font-weight:900;letter-spacing:4px;line-height:1;text-align:center}
+#sub{margin-top:22px;text-align:center;color:#888;font-size:16px;line-height:1.7}
+#timer{margin-top:16px;font:34px monospace;color:#aaa}
+#progress{position:absolute;bottom:20px;left:30px;right:30px;height:5px;background:#292929;border-radius:5px;overflow:hidden}
+#bar{height:100%;width:0%;background:#fff;transition:width .2s}
+.go{color:#00ff66;text-shadow:0 0 30px #00ff66}.success{color:#00ccff;text-shadow:0 0 30px #00ccff}.perfect{color:#ffe600;text-shadow:0 0 35px #ffe600}.fail{color:#ff3333;text-shadow:0 0 25px #ff3333}.count{color:#fff}
+#result{position:absolute;inset:0;background:rgba(5,5,5,.98);display:none;flex-direction:column;align-items:center;justify-content:center;text-align:center;z-index:5}
+#result h1{font-size:48px;margin:0 0 18px}#rank{font-size:90px;font-weight:900;margin:0 0 15px}
+.grid{display:grid;grid-template-columns:1fr 1fr;gap:10px 45px;font-size:18px}.grid span{color:#777}
+button{margin-top:30px;padding:14px 50px;border:0;border-radius:8px;background:#fff;color:#000;font-size:18px;font-weight:bold;cursor:pointer}
+#flash{position:absolute;inset:0;pointer-events:none;opacity:0;z-index:10}
+.green{animation:green .15s}.red{animation:red .2s}
+@keyframes green{0%{opacity:.3;background:#0f6}100%{opacity:0}}
+@keyframes red{0%{opacity:.35;background:red}100%{opacity:0}}
+@media(max-width:600px){.stat{min-width:80px}.value{font-size:18px}.label{font-size:8px}#result h1{font-size:34px}.grid{gap:8px 20px;font-size:15px}}
+</style>
+</head>
+<body>
+<div id="game">
+  <div id="hud">
+    <div class="stat"><div class="label">ROUND</div><div class="value" id="round">0 / 10</div></div>
+    <div class="stat"><div class="label">BEST</div><div class="value" id="best">-- F</div></div>
+    <div class="stat"><div class="label">COMBO</div><div class="value" id="combo">0</div></div>
+  </div>
+  <div id="arena">
+    <div id="message" class="count">READY</div>
+    <div id="sub">この画面が出たら待機<br><b>GO!</b> が出た瞬間に SPACE</div>
+    <div id="timer">--.-- F</div>
+    <div id="progress"><div id="bar"></div></div>
+  </div>
+  <div id="result">
+    <h1>TEST COMPLETE</h1>
+    <div id="rank">S</div>
+    <div class="grid">
+      <div>平均 <b id="avg">--</b> F</div>
+      <div>ベスト <b id="bestR">--</b> F</div>
+      <div>成功 <b id="success">--</b> / 10</div>
+      <div>最高COMBO <b id="maxCombo">--</b></div>
+    </div>
+    <button id="retry">もう一度</button>
+  </div>
+  <div id="flash"></div>
+</div>
+
+<script>
+const FPS=60, LIMIT=26, TOTAL=10;
+let state="idle", round=0, combo=0, maxCombo=0, results=[], goTime=0, timerId=null;
+
+const $=id=>document.getElementById(id);
+const msg=$("message"), sub=$("sub"), timer=$("timer"), bar=$("bar");
+const roundEl=$("round"), bestEl=$("best"), comboEl=$("combo"), flash=$("flash");
+
+function hud(){
+  roundEl.textContent=`${round} / ${TOTAL}`;
+  comboEl.textContent=combo;
+  bestEl.textContent=results.length ? Math.min(...results).toFixed(2)+" F" : "-- F";
+}
+
+function start(){
+  clearTimeout(timerId);
+  $("result").style.display="none";
+  state="waiting"; round=0; combo=0; maxCombo=0; results=[];
+  bar.style.width="0%"; hud();
+  nextRound();
+}
+
+function nextRound(){
+  if(round>=TOTAL){ finish(); return; }
+  round++;
+  state="waiting";
+  msg.className="count"; msg.textContent="WAIT...";
+  sub.innerHTML="GO! が出るまで待て！<br><b>SPACE</b>を早く押すとフライング";
+  timer.textContent="--.-- F";
+  hud(); bar.style.width=((round-1)/TOTAL*100)+"%";
+
+  const delay=1200+Math.random()*2300;
+  timerId=setTimeout(go,delay);
+}
+
+function go(){
+  if(state!=="waiting") return;
+  state="go";
+  goTime=performance.now();
+  msg.className="go"; msg.textContent="GO!";
+  sub.innerHTML="<b>SPACE!!</b>";
+  timer.textContent="0.00 F";
+  flash.className="";
+  requestAnimationFrame(()=>flash.className="green");
+}
+
+function press(){
+  if(state==="waiting"){
+    clearTimeout(timerId);
+    state="false";
+    combo=0;
+    msg.className="fail"; msg.textContent="FALSE START";
+    sub.innerHTML="早すぎる！<br>次のラウンドへ";
+    timer.textContent="FLYING";
+    flash.className="red"; hud();
+    setTimeout(nextRound,850);
+    return;
+  }
+  if(state==="go"){
+    const ms=performance.now()-goTime;
+    const f=ms*FPS/1000;
+    state="result"; results.push(f);
+    timer.textContent=f.toFixed(2)+" F";
+    if(f<=LIMIT){
+      combo++; maxCombo=Math.max(maxCombo,combo);
+      msg.className=f<=16?"perfect":"success";
+      msg.textContent=f<=16?"PERFECT!":"SUCCESS!";
+      sub.innerHTML=`${f.toFixed(2)}F<br>26F以内！`;
+      flash.className="green";
+    }else{
+      combo=0; msg.className="fail"; msg.textContent="TOO SLOW";
+      sub.innerHTML=`${f.toFixed(2)}F<br>26F OVER`;
+      flash.className="red";
+    }
+    hud(); setTimeout(nextRound,800);
+  }
+}
+
+function finish(){
+  state="finished"; bar.style.width="100%";
+  const ok=results.filter(f=>f<=LIMIT).length;
+  const avg=results.reduce((a,b)=>a+b,0)/results.length;
+  const best=Math.min(...results);
+  let r="C";
+  if(ok===10&&avg<=18)r="SSS";
+  else if(ok>=9&&avg<=20)r="SS";
+  else if(ok>=8&&avg<=22)r="S";
+  else if(ok>=7&&avg<=24)r="A";
+  else if(ok>=5&&avg<=26)r="B";
+  $("rank").textContent=r;
+  $("avg").textContent=avg.toFixed(2);
+  $("bestR").textContent=best.toFixed(2);
+  $("success").textContent=ok;
+  $("maxCombo").textContent=maxCombo;
+  $("result").style.display="flex";
+}
+
+document.addEventListener("keydown",e=>{
+  if(e.code==="Space"){
+    e.preventDefault();
+    if(e.repeat)return;
+    if(state==="idle") start();
+    else press();
+  }
+});
+$("retry").addEventListener("click",start);
+
+/* ファイルを開いたら自動スタート */
+window.addEventListener("load",()=>{
+  setTimeout(start,700);
+});
+</script>
+</body>
+</html>
