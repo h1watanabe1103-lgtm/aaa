@@ -1,150 +1,2747 @@
+```html
 <!DOCTYPE html>
 <html lang="ja">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width,initial-scale=1.0,user-scalable=no">
-<title>26F REACTION TEST</title>
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+
+<title>FIGHTING REFLEX TEST</title>
+
 <style>
-*{box-sizing:border-box}
-html,body{margin:0;width:100%;height:100%;overflow:hidden;background:#080808;color:#fff;font-family:Arial,"Segoe UI",sans-serif;user-select:none;-webkit-user-select:none}
-body{display:flex;align-items:center;justify-content:center}
-#game{width:min(900px,94vw);height:min(650px,92vh);background:#111;border:2px solid #333;border-radius:18px;overflow:hidden;position:relative;box-shadow:0 0 50px #000}
-#hud{height:76px;border-bottom:1px solid #333;display:flex;align-items:center;justify-content:space-around;background:#0d0d0d}
-.stat{text-align:center;min-width:130px}.label{font-size:11px;color:#777;letter-spacing:2px}.value{font-size:24px;margin-top:3px}
-#arena{height:calc(100% - 76px);display:flex;flex-direction:column;align-items:center;justify-content:center;position:relative}
-#message{font-size:clamp(52px,10vw,110px);font-weight:900;letter-spacing:4px;line-height:1;text-align:center}
-#sub{margin-top:22px;text-align:center;color:#888;font-size:16px;line-height:1.7}
-#timer{margin-top:16px;font:34px monospace;color:#aaa}
-#tap{display:none;margin-top:28px;width:min(320px,70vw);height:110px;border:3px solid #555;border-radius:18px;background:#222;color:#fff;font-size:32px;font-weight:900;touch-action:manipulation}
-#tap.goTap{background:#0a5;color:#fff;border-color:#0f6;box-shadow:0 0 30px #0f64}
-#progress{position:absolute;bottom:20px;left:30px;right:30px;height:5px;background:#292929;border-radius:5px;overflow:hidden}
-#bar{height:100%;width:0%;background:#fff;transition:width .2s}
-.go{color:#00ff66;text-shadow:0 0 30px #00ff66}.success{color:#00ccff;text-shadow:0 0 30px #00ccff}.perfect{color:#ffe600;text-shadow:0 0 35px #ffe600}.fail{color:#ff3333;text-shadow:0 0 25px #ff3333}.count{color:#fff}
-#result{position:absolute;inset:0;background:rgba(5,5,5,.98);display:none;flex-direction:column;align-items:center;justify-content:center;text-align:center;z-index:5}
-#result h1{font-size:48px;margin:0 0 18px}#rank{font-size:90px;font-weight:900;margin:0 0 15px}
-.grid{display:grid;grid-template-columns:1fr 1fr;gap:10px 45px;font-size:18px}.grid span{color:#777}
-button{margin-top:30px;padding:14px 50px;border:0;border-radius:8px;background:#fff;color:#000;font-size:18px;font-weight:bold;cursor:pointer}
-#flash{position:absolute;inset:0;pointer-events:none;opacity:0;z-index:10}
-.green{animation:green .15s}.red{animation:red .2s}
-@keyframes green{0%{opacity:.3;background:#0f6}100%{opacity:0}}
-@keyframes red{0%{opacity:.35;background:red}100%{opacity:0}}
-@media(max-width:600px){
-  #game{width:100vw;height:100vh;border:0;border-radius:0}
-  #hud{height:65px}.stat{min-width:80px}.value{font-size:18px}.label{font-size:8px}
-  #arena{height:calc(100% - 65px)}
-  #tap{display:block}
-  #result h1{font-size:34px}.grid{gap:8px 20px;font-size:15px}
+*{
+    box-sizing:border-box;
+    user-select:none;
+    -webkit-user-select:none;
+}
+
+body{
+    margin:0;
+    background:#08090d;
+    color:#fff;
+    font-family:Arial,"Noto Sans JP",sans-serif;
+    overflow-x:hidden;
+}
+
+#game{
+    min-height:100vh;
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+}
+
+h1{
+    margin:15px 0 2px;
+    font-size:28px;
+    letter-spacing:4px;
+}
+
+#subtitle{
+    color:#777;
+    font-size:13px;
+}
+
+/* =========================
+   EXPLANATION
+========================= */
+
+#explanation{
+    width:min(680px,94vw);
+    margin-top:25px;
+    text-align:center;
+}
+
+.explainBox{
+    max-height:62vh;
+    overflow-y:auto;
+
+    padding:20px;
+
+    background:#17191f;
+
+    border:2px solid #444;
+
+    border-radius:12px;
+
+    text-align:left;
+
+    line-height:1.55;
+}
+
+.explainBox h3{
+    text-align:center;
+    font-size:22px;
+    margin-top:0;
+}
+
+.explainBox hr{
+    border:0;
+    border-top:1px solid #444;
+    margin:15px 0;
+}
+
+.explainBox p{
+    margin:8px 0;
+}
+
+.explainCommand{
+    padding:10px;
+    margin:8px 0;
+    background:#24262e;
+    border-radius:7px;
+    text-align:center;
+    font-size:18px;
+    font-weight:bold;
+}
+
+/* =========================
+   SETUP
+========================= */
+
+#setup{
+    display:none;
+    margin-top:50px;
+    text-align:center;
+}
+
+#setup h2{
+    margin-bottom:25px;
+}
+
+.sideButton{
+    padding:17px 38px;
+    margin:8px;
+    border:2px solid #666;
+    border-radius:8px;
+    background:#181a20;
+    color:#fff;
+    font-size:18px;
+    cursor:pointer;
+}
+
+.sideButton:hover{
+    background:#30333c;
+}
+
+/* =========================
+   INFO
+========================= */
+
+#info{
+    display:none;
+    width:min(1000px,96vw);
+    text-align:center;
+}
+
+#problem{
+    min-height:32px;
+    margin-top:8px;
+    font-size:21px;
+    font-weight:bold;
+}
+
+#timer{
+    color:#ffd43b;
+    font-size:20px;
+    font-weight:bold;
+}
+
+#message{
+    height:27px;
+    font-size:18px;
+}
+
+/* =========================
+   ARENA
+========================= */
+
+#arena{
+    display:none;
+    position:relative;
+    width:min(1000px,96vw);
+    height:450px;
+    overflow:hidden;
+
+    border:3px solid #383b45;
+
+    background:
+    radial-gradient(
+        ellipse at center 70%,
+        #30333c 0,
+        #191b21 45%,
+        #0d0e12 100%
+    );
+}
+
+#arena:before{
+    content:"";
+    position:absolute;
+    left:0;
+    right:0;
+    bottom:38px;
+    height:1px;
+    background:#555;
+}
+
+#arena:after{
+    content:"";
+    position:absolute;
+    left:5%;
+    right:5%;
+    bottom:8px;
+    height:25px;
+    border-top:2px solid #555;
+    background:
+    repeating-linear-gradient(
+        90deg,
+        transparent 0 50px,
+        #222 50px 52px
+    );
+}
+
+.floor{
+    position:absolute;
+    bottom:0;
+    left:0;
+    width:100%;
+    height:8px;
+    background:#888;
+    z-index:1;
+}
+
+/* =========================
+   FIGHTER
+========================= */
+
+.fighter{
+    position:absolute;
+    bottom:38px;
+    width:110px;
+    height:190px;
+    z-index:5;
+    transform-origin:bottom center;
+}
+
+/* 左右反転用 */
+
+.face-left{
+    transform:scaleX(-1);
+}
+
+#player{
+    left:100px;
+}
+
+#enemy{
+    right:100px;
+}
+
+/* 頭 */
+
+.f-head{
+    position:absolute;
+    left:34px;
+    top:5px;
+    width:43px;
+    height:43px;
+    border-radius:50%;
+    background:#d99b70;
+    z-index:5;
+}
+
+/* 髪 */
+
+.f-hair{
+    position:absolute;
+    left:31px;
+    top:0;
+    width:48px;
+    height:25px;
+    border-radius:50% 55% 20% 20%;
+    background:#20242d;
+    z-index:6;
+}
+
+/* 顔 */
+
+.f-eye{
+    position:absolute;
+    left:64px;
+    top:20px;
+    width:5px;
+    height:5px;
+    border-radius:50%;
+    background:#151515;
+    z-index:7;
+}
+
+/* 胴体 */
+
+.f-body{
+    position:absolute;
+    left:28px;
+    top:44px;
+    width:55px;
+    height:78px;
+    border-radius:18px 18px 9px 9px;
+    background:#1769aa;
+}
+
+/* 胸 */
+
+.f-chest{
+    position:absolute;
+    left:35px;
+    top:52px;
+    width:41px;
+    height:35px;
+    border-radius:8px;
+    border:2px solid rgba(255,255,255,.25);
+    z-index:4;
+}
+
+/* 腕 */
+
+.f-arm{
+    position:absolute;
+    top:52px;
+    width:20px;
+    height:68px;
+    border-radius:12px;
+    background:#1769aa;
+    transform-origin:top center;
+    z-index:3;
+}
+
+/* 左腕 */
+
+.f-arm-l{
+    left:12px;
+    transform:rotate(18deg);
+}
+
+/* 右腕 */
+
+.f-arm-r{
+    right:10px;
+    transform:rotate(-18deg);
+}
+
+/* グローブ */
+
+.f-glove{
+    position:absolute;
+    width:24px;
+    height:24px;
+    border-radius:50%;
+    background:#e7e7e7;
+}
+
+.f-arm-l .f-glove{
+    bottom:-7px;
+    left:-2px;
+}
+
+.f-arm-r .f-glove{
+    bottom:-7px;
+    right:-2px;
+}
+
+/* 足 */
+
+.f-leg{
+    position:absolute;
+    top:113px;
+    width:23px;
+    height:78px;
+    border-radius:12px;
+    background:#172f4a;
+    transform-origin:top center;
+}
+
+.f-leg-l{
+    left:29px;
+    transform:rotate(4deg);
+}
+
+.f-leg-r{
+    right:25px;
+    transform:rotate(-4deg);
+}
+
+/* 靴 */
+
+.f-foot{
+    position:absolute;
+    bottom:-3px;
+    width:37px;
+    height:17px;
+    border-radius:12px 15px 8px 8px;
+    background:#11151c;
+}
+
+.f-leg-l .f-foot{
+    left:-7px;
+}
+
+.f-leg-r .f-foot{
+    right:-7px;
+}
+
+/* 敵の服 */
+
+#enemy .f-body,
+#enemy .f-arm{
+    background:#a92c32;
+}
+
+#enemy .f-leg{
+    background:#491e27;
+}
+
+/* =========================
+   IDLE
+========================= */
+
+.idle{
+    animation:idle .75s infinite ease-in-out;
+}
+
+@keyframes idle{
+    0%,100%{
+        transform:translateY(0) scaleY(1);
+    }
+
+    50%{
+        transform:translateY(-3px) scaleY(1.015);
+    }
+}
+
+/* =========================
+   ATTACK
+========================= */
+
+.attack-motion{
+    animation:attackMotion .24s ease-out;
+}
+
+.attack-motion .f-arm-r{
+    animation:punch .24s ease-out;
+}
+
+@keyframes punch{
+
+    0%{
+        transform:rotate(-18deg);
+    }
+
+    35%{
+        transform:rotate(-65deg) translateX(5px);
+    }
+
+    60%{
+        transform:rotate(-90deg) translateX(30px);
+    }
+
+    100%{
+        transform:rotate(-18deg);
+    }
+}
+
+@keyframes attackMotion{
+
+    0%{
+        transform:translateX(0);
+    }
+
+    45%{
+        transform:translateX(13px);
+    }
+
+    100%{
+        transform:translateX(0);
+    }
+}
+
+/* =========================
+   LOW ATTACK
+========================= */
+
+.low-motion{
+    animation:lowMotion .3s ease-out;
+}
+
+.low-motion .f-body{
+    transform:rotate(12deg);
+}
+
+.low-motion .f-leg-l{
+    animation:lowKick .3s ease-out;
+}
+
+@keyframes lowMotion{
+
+    0%{
+        transform:translateY(0);
+    }
+
+    35%{
+        transform:translateY(12px);
+    }
+
+    100%{
+        transform:translateY(0);
+    }
+}
+
+@keyframes lowKick{
+
+    0%{
+        transform:rotate(4deg);
+    }
+
+    45%{
+        transform:rotate(60deg) translateX(10px);
+    }
+
+    100%{
+        transform:rotate(4deg);
+    }
+}
+
+/* =========================
+   IMPACT
+========================= */
+
+.impact-motion{
+    animation:impactMotion .32s ease-out;
+}
+
+.impact-motion .f-arm-l{
+    animation:impactArm .32s ease-out;
+}
+
+@keyframes impactMotion{
+
+    0%{
+        transform:translateX(0);
+    }
+
+    35%{
+        transform:translateX(-8px) scaleX(.95);
+    }
+
+    55%{
+        transform:translateX(5px) scaleX(1.05);
+    }
+
+    100%{
+        transform:translateX(0);
+    }
+}
+
+@keyframes impactArm{
+
+    0%{
+        transform:rotate(18deg);
+    }
+
+    45%{
+        transform:rotate(-45deg) translateX(-12px);
+    }
+
+    100%{
+        transform:rotate(18deg);
+    }
+}
+
+/* =========================
+   GUARD
+========================= */
+
+.guard-motion .f-arm-l{
+    transform:rotate(75deg) translateY(-8px);
+}
+
+.guard-motion .f-arm-r{
+    transform:rotate(-75deg) translateY(-8px);
+}
+
+.guard-motion{
+    transform:translateY(2px);
+}
+
+/* =========================
+   HIT
+========================= */
+
+.hit-motion{
+    animation:hitMotion .35s ease-out;
+}
+
+@keyframes hitMotion{
+
+    0%{
+        transform:translateX(0);
+    }
+
+    20%{
+        transform:translateX(-10px) rotate(-5deg);
+    }
+
+    45%{
+        transform:translateX(15px) rotate(5deg);
+    }
+
+    100%{
+        transform:translateX(0);
+    }
+}
+
+/* =========================
+   JUMP
+========================= */
+
+.jump-motion{
+    animation:jumpMotion .55s ease-out;
+}
+
+@keyframes jumpMotion{
+
+    0%{
+        transform:translateY(0);
+    }
+
+    45%{
+        transform:translateY(-150px);
+    }
+
+    100%{
+        transform:translateY(0);
+    }
+}
+
+/* =========================
+   ENEMY SIGNAL
+========================= */
+
+.enemy-red .f-head,
+.enemy-red .f-body,
+.enemy-red .f-arm,
+.enemy-red .f-leg{
+
+    filter:
+        drop-shadow(0 0 10px red)
+        drop-shadow(0 0 25px red);
+
+    animation:glowRed .12s infinite alternate;
+}
+
+.enemy-green .f-head,
+.enemy-green .f-body,
+.enemy-green .f-arm,
+.enemy-green .f-leg{
+
+    filter:
+        drop-shadow(0 0 10px #00ff45)
+        drop-shadow(0 0 25px #00ff45);
+
+    animation:glowGreen .12s infinite alternate;
+}
+
+.enemy-orange .f-head,
+.enemy-orange .f-body,
+.enemy-orange .f-arm,
+.enemy-orange .f-leg{
+
+    filter:
+        drop-shadow(0 0 10px orange)
+        drop-shadow(0 0 25px orange);
+
+    animation:glowOrange .12s infinite alternate;
+}
+
+.enemy-feint .f-head,
+.enemy-feint .f-body,
+.enemy-feint .f-arm,
+.enemy-feint .f-leg{
+
+    filter:
+        drop-shadow(0 0 8px white)
+        drop-shadow(0 0 18px white);
+
+    animation:glowFeint .1s infinite alternate;
+}
+
+@keyframes glowRed{
+    from{opacity:.7}
+    to{opacity:1}
+}
+
+@keyframes glowGreen{
+    from{opacity:.7}
+    to{opacity:1}
+}
+
+@keyframes glowOrange{
+    from{opacity:.7}
+    to{opacity:1}
+}
+
+@keyframes glowFeint{
+    from{opacity:.65}
+    to{opacity:1}
+}
+
+/* =========================
+   FLASH
+========================= */
+
+.flash{
+    position:absolute;
+    left:50%;
+    top:50%;
+
+    width:180px;
+    height:180px;
+
+    transform:translate(-50%,-50%);
+
+    border-radius:50%;
+
+    background:white;
+
+    opacity:0;
+
+    pointer-events:none;
+
+    z-index:20;
+}
+
+.flash.active{
+    animation:flash .15s ease-out;
+}
+
+@keyframes flash{
+
+    0%{
+        opacity:.9;
+        transform:
+            translate(-50%,-50%)
+            scale(.5);
+    }
+
+    100%{
+        opacity:0;
+        transform:
+            translate(-50%,-50%)
+            scale(1.5);
+    }
+}
+
+/* =========================
+   START
+========================= */
+
+#startBtn{
+    display:none;
+
+    padding:14px 40px;
+
+    margin:14px;
+
+    border:0;
+
+    border-radius:8px;
+
+    background:#1fa463;
+
+    color:#fff;
+
+    font-size:20px;
+
+    cursor:pointer;
+}
+
+#startBtn:hover{
+    background:#27bd70;
+}
+
+/* =========================
+   CONTROLS
+========================= */
+
+#controls{
+    display:none;
+
+    width:min(1000px,96vw);
+
+    height:205px;
+
+    position:relative;
+
+    margin-top:10px;
+}
+
+/* 左側方向キー */
+
+#directionPad{
+    position:absolute;
+
+    left:8px;
+    top:5px;
+
+    width:200px;
+    height:175px;
+}
+
+.key{
+    position:absolute;
+
+    width:58px;
+    height:52px;
+
+    border:2px solid #60636d;
+
+    border-radius:9px;
+
+    background:#1b1d24;
+
+    color:white;
+
+    font-size:20px;
+
+    font-weight:bold;
+
+    touch-action:none;
+}
+
+.key:active{
+    background:#555;
+    transform:scale(.94);
+}
+
+.up{
+    left:70px;
+    top:0;
+}
+
+.left{
+    left:7px;
+    top:58px;
+}
+
+.down{
+    left:70px;
+    top:58px;
+}
+
+.right{
+    left:133px;
+    top:58px;
+}
+
+/* 攻撃ボタン */
+
+#actionButtons{
+    position:absolute;
+
+    right:10px;
+    top:25px;
+
+    display:flex;
+
+    gap:10px;
+
+    align-items:center;
+}
+
+.action{
+    position:relative;
+
+    width:75px;
+    height:75px;
+
+    border-radius:50%;
+
+    background:#76358e;
+
+    border:3px solid #aaa;
+
+    font-size:22px;
+}
+
+.impact{
+    background:#a72c2c;
+}
+
+.antiAirButton{
+    background:#d47b20;
+    font-size:14px;
+}
+
+/* =========================
+   KEYBOARD
+========================= */
+
+#keyboardInfo{
+    color:#666;
+
+    font-size:13px;
+
+    margin-bottom:10px;
+}
+
+/* =========================
+   RESULT
+========================= */
+
+#result{
+    display:none;
+
+    width:min(850px,95vw);
+
+    margin:25px auto;
+
+    padding:25px;
+
+    background:#18191e;
+
+    border:2px solid #3c3f48;
+
+    border-radius:12px;
+}
+
+.resultTitle{
+    text-align:center;
+
+    font-size:32px;
+
+    letter-spacing:4px;
+
+    margin-bottom:20px;
+}
+
+.stats{
+    display:grid;
+
+    grid-template-columns:
+        repeat(4,1fr);
+
+    gap:10px;
+}
+
+.stat{
+    padding:15px 8px;
+
+    background:#25272e;
+
+    border-radius:8px;
+
+    text-align:center;
+}
+
+.big{
+    margin-top:5px;
+
+    font-size:27px;
+
+    font-weight:bold;
+}
+
+table{
+    width:100%;
+
+    margin-top:25px;
+
+    border-collapse:collapse;
+}
+
+th,
+td{
+    padding:10px 5px;
+
+    border-bottom:
+        1px solid #3b3d44;
+
+    text-align:center;
+}
+
+.success{
+    color:#42ff65;
+}
+
+.miss{
+    color:#ff4d4d;
+}
+
+#evaluation{
+    margin-top:25px;
+
+    text-align:center;
+
+    font-size:34px;
+
+    font-weight:bold;
+}
+
+#retry{
+    display:block;
+
+    margin:20px auto 0;
+
+    padding:13px 30px;
+
+    border:0;
+
+    border-radius:8px;
+
+    background:#287db5;
+
+    color:#fff;
+
+    font-size:18px;
+
+    cursor:pointer;
+}
+
+/* =========================
+   MOBILE
+========================= */
+
+@media(max-width:650px){
+
+    h1{
+        font-size:21px;
+    }
+
+    #arena{
+        height:340px;
+    }
+
+    #player{
+        left:20px;
+    }
+
+    #enemy{
+        right:20px;
+    }
+
+    .fighter{
+        transform:scale(.78);
+    }
+
+    #controls{
+        height:190px;
+    }
+
+    #actionButtons{
+        right:3px;
+        gap:6px;
+    }
+
+    .action{
+        width:65px;
+        height:65px;
+        font-size:19px;
+    }
+
+    .antiAirButton{
+        font-size:12px;
+    }
+
+    .stats{
+        grid-template-columns:
+            repeat(2,1fr);
+    }
+
 }
 </style>
 </head>
+
+
 <body>
+
 <div id="game">
-  <div id="hud">
-    <div class="stat"><div class="label">ROUND</div><div class="value" id="round">0 / 10</div></div>
-    <div class="stat"><div class="label">BEST</div><div class="value" id="best">-- F</div></div>
-    <div class="stat"><div class="label">COMBO</div><div class="value" id="combo">0</div></div>
-  </div>
 
-  <div id="arena">
-    <div id="message" class="count">READY</div>
-    <div id="sub">PC：SPACE / スマホ：TAP<br><b>GO!</b> が出た瞬間に押す！</div>
-    <div id="timer">--.-- F</div>
-    <button id="tap" type="button">TAP!</button>
-    <div id="progress"><div id="bar"></div></div>
-  </div>
+<h1>FIGHTING REFLEX TEST</h1>
 
-  <div id="result">
-    <h1>TEST COMPLETE</h1>
-    <div id="rank">S</div>
-    <div class="grid">
-      <div>平均 <b id="avg">--</b> F</div>
-      <div>ベスト <b id="bestR">--</b> F</div>
-      <div>成功 <b id="success">--</b> / 10</div>
-      <div>最高COMBO <b id="maxCombo">--</b></div>
-    </div>
-    <button id="retry">もう一度</button>
-  </div>
-  <div id="flash"></div>
+<div id="subtitle">
+REFLEX • COMMAND • 60FPS
 </div>
 
+
+<!-- =================================================
+     GAME EXPLANATION
+================================================= -->
+
+<div id="explanation">
+
+    <h2>🥊 GAME RULES</h2>
+
+    <div class="explainBox">
+
+        <h3>5問の反射神経テスト</h3>
+
+        <p>
+            相手の動きをよく見て、
+            指定された操作を制限フレーム以内に
+            完成させよう！
+        </p>
+
+        <hr>
+
+        <p>🔴 <b>インパクト</b></p>
+
+        <div class="explainCommand">
+            相手が赤く光る → K
+        </div>
+
+        <p>
+            <b>26F以内</b>にインパクト！
+        </p>
+
+
+        <p>🟢 <b>下段攻撃</b></p>
+
+        <div class="explainCommand">
+            ↓ → J
+        </div>
+
+        <p>
+            <b>20F以内</b>に完成！
+        </p>
+
+
+        <p>🟠 <b>対空</b></p>
+
+        <p>
+            相手がジャンプしたら、
+            コマンド対空または
+            ワンボタン対空！
+        </p>
+
+        <div class="explainCommand">
+            左サイド：→ ↓ ↘ + J
+        </div>
+
+        <div class="explainCommand">
+            右サイド：← ↓ ↙ + J
+        </div>
+
+        <p>
+            <b>55F以内</b>に完成！
+        </p>
+
+
+        <p>⚡ <b>ワンボタン対空</b></p>
+
+        <div class="explainCommand">
+            PC：SPACE
+        </div>
+
+        <p>
+            スマホでは「対空」ボタンを押すだけ！
+            こちらも<b>55F以内</b>。
+        </p>
+
+
+        <p>⚠ <b>フェイント</b></p>
+
+        <div class="explainCommand">
+            相手がフェイント → 何もしない
+        </div>
+
+        <p>
+            ボタンを押すとミス！
+        </p>
+
+        <hr>
+
+        <p>
+            <b>PC操作</b><br>
+            W / A / S / D：方向<br>
+            J：攻撃<br>
+            K：インパクト<br>
+            SPACE：ワンボタン対空
+        </p>
+
+        <p>
+            <b>スマホ</b><br>
+            画面下の方向キー・攻撃ボタンを使用。
+        </p>
+
+    </div>
+
+    <button
+        class="sideButton"
+        onclick="showSideSelect()"
+    >
+        ゲームを始める
+    </button>
+
+</div>
+
+
+<!-- =================================================
+     SIDE SELECT
+================================================= -->
+
+<div id="setup">
+
+    <h2>自分のサイドを選択</h2>
+
+    <button
+        class="sideButton"
+        onclick="selectSide('left')"
+    >
+        ◀ LEFT
+    </button>
+
+    <button
+        class="sideButton"
+        onclick="selectSide('right')"
+    >
+        RIGHT ▶
+    </button>
+
+</div>
+
+
+<!-- =================================================
+     INFO
+================================================= -->
+
+<div id="info">
+
+    <div id="problem">
+        準備中
+    </div>
+
+    <div id="timer">
+        0F
+    </div>
+
+    <div id="message">
+    </div>
+
+</div>
+
+
+<!-- =================================================
+     ARENA
+================================================= -->
+
+<div id="arena">
+
+    <!-- PLAYER -->
+
+    <div
+        id="player"
+        class="fighter idle"
+    >
+
+        <div class="f-hair"></div>
+
+        <div class="f-head"></div>
+
+        <div class="f-eye"></div>
+
+        <div class="f-body"></div>
+
+        <div class="f-chest"></div>
+
+        <div class="f-arm f-arm-l">
+            <div class="f-glove"></div>
+        </div>
+
+        <div class="f-arm f-arm-r">
+            <div class="f-glove"></div>
+        </div>
+
+        <div class="f-leg f-leg-l">
+            <div class="f-foot"></div>
+        </div>
+
+        <div class="f-leg f-leg-r">
+            <div class="f-foot"></div>
+        </div>
+
+    </div>
+
+
+    <!-- ENEMY -->
+
+    <div
+        id="enemy"
+        class="fighter idle"
+    >
+
+        <div class="f-hair"></div>
+
+        <div class="f-head"></div>
+
+        <div class="f-eye"></div>
+
+        <div class="f-body"></div>
+
+        <div class="f-chest"></div>
+
+        <div class="f-arm f-arm-l">
+            <div class="f-glove"></div>
+        </div>
+
+        <div class="f-arm f-arm-r">
+            <div class="f-glove"></div>
+        </div>
+
+        <div class="f-leg f-leg-l">
+            <div class="f-foot"></div>
+        </div>
+
+        <div class="f-leg f-leg-r">
+            <div class="f-foot"></div>
+        </div>
+
+    </div>
+
+
+    <div
+        class="flash"
+        id="flash"
+    ></div>
+
+
+    <div class="floor"></div>
+
+</div>
+
+
+<!-- START -->
+
+<button
+    id="startBtn"
+    onclick="startTest()"
+>
+    TEST START
+</button>
+
+
+<!-- =================================================
+     MOBILE CONTROLS
+================================================= -->
+
+<div id="controls">
+
+    <div id="directionPad">
+
+        <button
+            class="key up"
+            data-key="up"
+        >
+            W
+        </button>
+
+        <button
+            class="key left"
+            data-key="left"
+        >
+            A
+        </button>
+
+        <button
+            class="key down"
+            data-key="down"
+        >
+            S
+        </button>
+
+        <button
+            class="key right"
+            data-key="right"
+        >
+            D
+        </button>
+
+    </div>
+
+
+    <div id="actionButtons">
+
+        <button
+            class="key action"
+            data-key="attack"
+        >
+            J
+        </button>
+
+        <button
+            class="key action impact"
+            data-key="impact"
+        >
+            K
+        </button>
+
+        <button
+            class="key action antiAirButton"
+            data-key="antiAir"
+        >
+            対空
+        </button>
+
+    </div>
+
+</div>
+
+
+<div id="keyboardInfo">
+    PC：WASD 方向　｜　J 攻撃　｜　K インパクト　｜　SPACE 対空
+</div>
+
+
+<!-- =================================================
+     RESULT
+================================================= -->
+
+<div id="result">
+
+    <div class="resultTitle">
+        RESULT
+    </div>
+
+
+    <div class="stats">
+
+        <div class="stat">
+            成功回数
+            <div
+                id="successCount"
+                class="big"
+            >
+                0
+            </div>
+        </div>
+
+
+        <div class="stat">
+            ミス回数
+            <div
+                id="missCount"
+                class="big"
+            >
+                0
+            </div>
+        </div>
+
+
+        <div class="stat">
+            成功率
+            <div
+                id="successRate"
+                class="big"
+            >
+                0%
+            </div>
+        </div>
+
+
+        <div class="stat">
+            平均反応
+            <div
+                id="averageFrame"
+                class="big"
+            >
+                -
+            </div>
+        </div>
+
+    </div>
+
+
+    <table>
+
+        <thead>
+
+            <tr>
+                <th>#</th>
+                <th>問題</th>
+                <th>結果</th>
+                <th>Frame</th>
+            </tr>
+
+        </thead>
+
+        <tbody id="resultTable">
+        </tbody>
+
+    </table>
+
+
+    <div id="evaluation">
+    </div>
+
+
+    <button
+        id="retry"
+        onclick="location.reload()"
+    >
+        もう一度挑戦
+    </button>
+
+</div>
+
+</div>
+
+
 <script>
-const FPS=60,LIMIT=26,TOTAL=10;
-let state="idle",round=0,combo=0,maxCombo=0,results=[],goTime=0,timerId=null;
 
-const $=id=>document.getElementById(id);
-const msg=$("message"),sub=$("sub"),timer=$("timer"),bar=$("bar");
-const roundEl=$("round"),bestEl=$("best"),comboEl=$("combo"),flash=$("flash"),tap=$("tap");
+/* =====================================================
+   GAME VARIABLES
+===================================================== */
 
-function hud(){
-  roundEl.textContent=`${round} / ${TOTAL}`;
-  comboEl.textContent=combo;
-  bestEl.textContent=results.length?Math.min(...results).toFixed(2)+" F":"-- F";
+const FPS = 60;
+
+let playerSide = "left";
+
+let round = 0;
+
+let success = 0;
+
+let miss = 0;
+
+let results = [];
+
+let currentType = null;
+
+let active = false;
+
+let startTime = 0;
+
+let deadline = 0;
+
+let command = [];
+
+let frameTimer = null;
+
+
+/* =====================================================
+   SHOW SIDE SELECT
+===================================================== */
+
+function showSideSelect(){
+
+    document.getElementById("explanation")
+        .style.display = "none";
+
+    document.getElementById("setup")
+        .style.display = "block";
+
 }
-function start(){
-  clearTimeout(timerId);
-  $("result").style.display="none";
-  state="waiting";round=0;combo=0;maxCombo=0;results=[];
-  bar.style.width="0%";hud();nextRound();
-}
-function nextRound(){
-  if(round>=TOTAL){finish();return}
-  round++;state="waiting";
-  msg.className="count";msg.textContent="WAIT...";
-  sub.innerHTML="GO! が出るまで待て！<br><b>SPACE / TAP</b>を早く押すとフライング";
-  timer.textContent="--.-- F";
-  tap.classList.remove("goTap");
-  tap.textContent="TAP!";
-  hud();bar.style.width=((round-1)/TOTAL*100)+"%";
-  timerId=setTimeout(go,1200+Math.random()*2300);
-}
-function go(){
-  if(state!=="waiting")return;
-  state="go";goTime=performance.now();
-  msg.className="go";msg.textContent="GO!";
-  sub.innerHTML="<b>SPACE / TAP!!</b>";timer.textContent="0.00 F";
-  tap.classList.add("goTap");tap.textContent="TAP NOW!";
-  flash.className="";requestAnimationFrame(()=>flash.className="green");
-}
-function press(){
-  if(state==="idle"){start();return}
-  if(state==="waiting"){
-    clearTimeout(timerId);state="false";combo=0;
-    msg.className="fail";msg.textContent="FALSE START";
-    sub.innerHTML="早すぎる！<br>次のラウンドへ";timer.textContent="FLYING";
-    tap.classList.remove("goTap");flash.className="red";hud();
-    setTimeout(nextRound,850);return;
-  }
-  if(state==="go"){
-    const f=(performance.now()-goTime)*FPS/1000;
-    state="result";results.push(f);timer.textContent=f.toFixed(2)+" F";
-    tap.classList.remove("goTap");tap.textContent="TAP!";
-    if(f<=LIMIT){
-      combo++;maxCombo=Math.max(maxCombo,combo);
-      msg.className=f<=16?"perfect":"success";msg.textContent=f<=16?"PERFECT!":"SUCCESS!";
-      sub.innerHTML=`${f.toFixed(2)}F<br>26F以内！`;flash.className="green";
+
+
+/* =====================================================
+   SIDE SELECT
+===================================================== */
+
+function selectSide(side){
+
+    playerSide = side;
+
+    document.getElementById("setup")
+        .style.display = "none";
+
+    document.getElementById("arena")
+        .style.display = "block";
+
+    document.getElementById("info")
+        .style.display = "block";
+
+    document.getElementById("controls")
+        .style.display = "block";
+
+    document.getElementById("startBtn")
+        .style.display = "block";
+
+
+    const player =
+        document.getElementById("player");
+
+
+    if(side === "right"){
+
+        player.style.left = "auto";
+
+        player.style.right = "100px";
+
+        /*
+           右向きになるように反転
+        */
+
+        player.classList.add("face-left");
+
     }else{
-      combo=0;msg.className="fail";msg.textContent="TOO SLOW";
-      sub.innerHTML=`${f.toFixed(2)}F<br>26F OVER`;flash.className="red";
+
+        player.style.left = "100px";
+
+        player.style.right = "auto";
+
+        player.classList.remove("face-left");
+
     }
-    hud();setTimeout(nextRound,800);
-  }
+
+
+    document.getElementById("problem")
+        .textContent =
+        "自分：" +
+        (
+            side === "left"
+            ? "左サイド"
+            : "右サイド"
+        );
+
 }
-function finish(){
-  state="finished";bar.style.width="100%";
-  const ok=results.filter(f=>f<=LIMIT).length;
-  const avg=results.reduce((a,b)=>a+b,0)/results.length,best=Math.min(...results);
-  let r="C";
-  if(ok===10&&avg<=18)r="SSS";else if(ok>=9&&avg<=20)r="SS";else if(ok>=8&&avg<=22)r="S";
-  else if(ok>=7&&avg<=24)r="A";else if(ok>=5&&avg<=26)r="B";
-  $("rank").textContent=r;$("avg").textContent=avg.toFixed(2);$("bestR").textContent=best.toFixed(2);
-  $("success").textContent=ok;$("maxCombo").textContent=maxCombo;$("result").style.display="flex";
+
+
+/* =====================================================
+   START
+===================================================== */
+
+function startTest(){
+
+    document.getElementById("startBtn")
+        .style.display = "none";
+
+    round = 0;
+
+    success = 0;
+
+    miss = 0;
+
+    results = [];
+
+    nextRound();
+
 }
-document.addEventListener("keydown",e=>{
-  if(e.code==="Space"){e.preventDefault();if(e.repeat)return;press()}
+
+
+/* =====================================================
+   NEXT ROUND
+===================================================== */
+
+function nextRound(){
+
+    if(round >= 5){
+
+        showResult();
+
+        return;
+
+    }
+
+
+    round++;
+
+    active = false;
+
+    command = [];
+
+
+    const enemy =
+        document.getElementById("enemy");
+
+    const player =
+        document.getElementById("player");
+
+
+    enemy.className =
+        "fighter idle";
+
+    player.className =
+        "fighter idle";
+
+
+    document.getElementById("timer")
+        .textContent = "0F";
+
+
+    document.getElementById("message")
+        .textContent =
+        `第${round}問　相手を見ろ...`;
+
+
+    /*
+       ランダムな待機時間
+    */
+
+    const wait =
+        800 + Math.random() * 1400;
+
+
+    setTimeout(() => {
+
+        const types = [
+            "impact",
+            "antiAir",
+            "downAttack",
+            "feint"
+        ];
+
+
+        currentType =
+            types[
+                Math.floor(
+                    Math.random() * types.length
+                )
+            ];
+
+
+        showChallenge();
+
+    }, wait);
+
+}
+
+
+/* =====================================================
+   SHOW CHALLENGE
+===================================================== */
+
+function showChallenge(){
+
+    const enemy =
+        document.getElementById("enemy");
+
+
+    active = true;
+
+    command = [];
+
+    startTime =
+        performance.now();
+
+
+    /*
+       RED / IMPACT
+    */
+
+    if(currentType === "impact"){
+
+        deadline = 26;
+
+        enemy.className =
+            "fighter enemy-red";
+
+
+        document.getElementById("problem")
+            .textContent =
+            "🔴 相手が赤く光った！ K！";
+
+    }
+
+
+    /*
+       ORANGE / ANTI AIR
+    */
+
+    else if(currentType === "antiAir"){
+
+        deadline = 55;
+
+        enemy.className =
+            "fighter enemy-orange jump-motion";
+
+
+        if(playerSide === "left"){
+
+            document.getElementById("problem")
+                .textContent =
+                "🟠 相手がジャンプ！ → ↓ ↘ + J　または SPACE";
+
+        }else{
+
+            document.getElementById("problem")
+                .textContent =
+                "🟠 相手がジャンプ！ ← ↓ ↙ + J　または SPACE";
+
+        }
+
+    }
+
+
+    /*
+       GREEN / DOWN ATTACK
+    */
+
+    else if(currentType === "downAttack"){
+
+        deadline = 20;
+
+        enemy.className =
+            "fighter enemy-green";
+
+
+        document.getElementById("problem")
+            .textContent =
+            "🟢 相手が緑に光った！ ↓ + J！";
+
+    }
+
+
+    /*
+       FEINT
+    */
+
+    else if(currentType === "feint"){
+
+        deadline = 20;
+
+        enemy.className =
+            "fighter enemy-feint";
+
+
+        document.getElementById("problem")
+            .textContent =
+            "⚠ フェイント！ 何も押すな！";
+
+    }
+
+
+    startFrameCounter();
+
+}
+
+
+/* =====================================================
+   GET FRAME
+===================================================== */
+
+function getFrame(){
+
+    return Math.floor(
+        (
+            performance.now() -
+            startTime
+        ) /
+        (1000 / FPS)
+    );
+
+}
+
+
+/* =====================================================
+   FRAME COUNTER
+===================================================== */
+
+function startFrameCounter(){
+
+    clearInterval(frameTimer);
+
+
+    frameTimer =
+        setInterval(() => {
+
+            if(!active) return;
+
+
+            const frame =
+                getFrame();
+
+
+            document.getElementById("timer")
+                .textContent =
+                frame + "F";
+
+
+            /*
+               制限時間超過
+            */
+
+            if(frame > deadline){
+
+                if(currentType === "feint"){
+
+                    finish(
+                        true,
+                        deadline
+                    );
+
+                }else{
+
+                    finish(
+                        false,
+                        deadline
+                    );
+
+                }
+
+            }
+
+        }, 3);
+
+}
+
+
+/* =====================================================
+   KEYBOARD INPUT
+===================================================== */
+
+document.addEventListener(
+    "keydown",
+    function(e){
+
+        if(!active) return;
+
+
+        let key = null;
+
+
+        if(
+            e.key === "w" ||
+            e.key === "W"
+        ){
+
+            key = "up";
+
+        }
+
+
+        if(
+            e.key === "a" ||
+            e.key === "A"
+        ){
+
+            key = "left";
+
+        }
+
+
+        if(
+            e.key === "s" ||
+            e.key === "S"
+        ){
+
+            key = "down";
+
+        }
+
+
+        if(
+            e.key === "d" ||
+            e.key === "D"
+        ){
+
+            key = "right";
+
+        }
+
+
+        if(
+            e.key === "j" ||
+            e.key === "J"
+        ){
+
+            key = "attack";
+
+        }
+
+
+        if(
+            e.key === "k" ||
+            e.key === "K"
+        ){
+
+            key = "impact";
+
+        }
+
+
+        /*
+           Space
+           ワンボタン対空
+        */
+
+        if(e.code === "Space"){
+
+            e.preventDefault();
+
+            key = "antiAir";
+
+        }
+
+
+        if(key !== null){
+
+            e.preventDefault();
+
+            pressKey(key);
+
+        }
+
+    }
+);
+
+
+/* =====================================================
+   MOBILE INPUT
+===================================================== */
+
+document.querySelectorAll(".key")
+.forEach(button => {
+
+    button.addEventListener(
+        "pointerdown",
+        function(e){
+
+            e.preventDefault();
+
+            if(!active) return;
+
+            pressKey(
+                button.dataset.key
+            );
+
+        }
+    );
+
 });
-tap.addEventListener("pointerdown",e=>{e.preventDefault();press()});
-$("retry").addEventListener("click",start);
-window.addEventListener("load",()=>setTimeout(start,700));
+
+
+/* =====================================================
+   INPUT
+===================================================== */
+
+function pressKey(key){
+
+    if(!active) return;
+
+
+    const frame =
+        getFrame();
+
+
+    /*
+       フェイント
+       何か押したら即ミス
+    */
+
+    if(currentType === "feint"){
+
+        finish(
+            false,
+            frame
+        );
+
+        return;
+
+    }
+
+
+    command.push({
+
+        key:key,
+
+        frame:frame
+
+    });
+
+
+    checkCommand();
+
+}
+
+
+/* =====================================================
+   COMMAND CHECK
+===================================================== */
+
+function checkCommand(){
+
+    const frame =
+        getFrame();
+
+
+    if(frame > deadline){
+
+        finish(
+            false,
+            frame
+        );
+
+        return;
+
+    }
+
+
+    /* =================================================
+       IMPACT
+    ================================================= */
+
+    if(currentType === "impact"){
+
+        if(
+            command.length === 1 &&
+            command[0].key === "impact"
+        ){
+
+            playerMotion("impact");
+
+            finish(
+                true,
+                frame
+            );
+
+        }else{
+
+            playerMotion("guard");
+
+            finish(
+                false,
+                frame
+            );
+
+        }
+
+        return;
+
+    }
+
+
+    /* =================================================
+       DOWN + ATTACK
+    ================================================= */
+
+    if(currentType === "downAttack"){
+
+        if(command.length === 1){
+
+            if(
+                command[0].key !== "down"
+            ){
+
+                playerMotion("hit");
+
+                finish(
+                    false,
+                    frame
+                );
+
+            }
+
+            return;
+
+        }
+
+
+        if(
+            command.length === 2 &&
+            command[0].key === "down" &&
+            command[1].key === "attack"
+        ){
+
+            playerMotion("low");
+
+            finish(
+                true,
+                frame
+            );
+
+        }else{
+
+            playerMotion("hit");
+
+            finish(
+                false,
+                frame
+            );
+
+        }
+
+        return;
+
+    }
+
+
+    /* =================================================
+       ANTI AIR
+    ================================================= */
+
+    if(currentType === "antiAir"){
+
+        let dir =
+            playerSide === "left"
+            ? "right"
+            : "left";
+
+
+        /*
+           ワンボタン対空
+
+           SPACE / スマホ対空ボタン
+        */
+
+        if(
+            command.length === 1 &&
+            command[0].key === "antiAir"
+        ){
+
+            playerMotion("attack");
+
+            enemyHit();
+
+            finish(
+                true,
+                frame
+            );
+
+            return;
+
+        }
+
+
+        /*
+           コマンド対空
+
+           左：
+           → ↓ ↘ + J
+
+           右：
+           ← ↓ ↙ + J
+
+           現在の入力方式では
+           方向 → 下 → 方向 → J
+           として判定。
+        */
+
+
+        if(command.length === 1){
+
+            if(
+                command[0].key !== dir
+            ){
+
+                playerMotion("hit");
+
+                finish(
+                    false,
+                    frame
+                );
+
+            }
+
+            return;
+
+        }
+
+
+        if(command.length === 2){
+
+            if(
+                command[1].key !== "down"
+            ){
+
+                playerMotion("hit");
+
+                finish(
+                    false,
+                    frame
+                );
+
+            }
+
+            return;
+
+        }
+
+
+        if(command.length === 3){
+
+            if(
+                command[2].key !== dir
+            ){
+
+                playerMotion("hit");
+
+                finish(
+                    false,
+                    frame
+                );
+
+            }
+
+            return;
+
+        }
+
+
+        if(command.length === 4){
+
+            if(
+                command[3].key === "attack"
+            ){
+
+                playerMotion("attack");
+
+                enemyHit();
+
+                finish(
+                    true,
+                    frame
+                );
+
+            }else{
+
+                playerMotion("hit");
+
+                finish(
+                    false,
+                    frame
+                );
+
+            }
+
+        }
+
+    }
+
+}
+
+
+/* =====================================================
+   PLAYER MOTION
+===================================================== */
+
+function playerMotion(type){
+
+    const player =
+        document.getElementById("player");
+
+
+    player.className =
+        "fighter";
+
+
+    if(type === "attack"){
+
+        player.classList.add(
+            "attack-motion"
+        );
+
+    }
+
+
+    if(type === "low"){
+
+        player.classList.add(
+            "low-motion"
+        );
+
+    }
+
+
+    if(type === "impact"){
+
+        player.classList.add(
+            "impact-motion"
+        );
+
+    }
+
+
+    if(type === "guard"){
+
+        player.classList.add(
+            "guard-motion"
+        );
+
+    }
+
+
+    if(type === "hit"){
+
+        player.classList.add(
+            "hit-motion"
+        );
+
+    }
+
+
+    setTimeout(() => {
+
+        player.className =
+            "fighter idle";
+
+
+        if(playerSide === "right"){
+
+            player.classList.add(
+                "face-left"
+            );
+
+        }
+
+    }, 400);
+
+}
+
+
+/* =====================================================
+   ENEMY HIT
+===================================================== */
+
+function enemyHit(){
+
+    const enemy =
+        document.getElementById("enemy");
+
+
+    enemy.className =
+        "fighter hit-motion";
+
+
+    const flash =
+        document.getElementById("flash");
+
+
+    flash.classList.remove(
+        "active"
+    );
+
+
+    /*
+       アニメーション再実行
+    */
+
+    void flash.offsetWidth;
+
+
+    flash.classList.add(
+        "active"
+    );
+
+
+    setTimeout(() => {
+
+        enemy.className =
+            "fighter idle";
+
+    }, 450);
+
+}
+
+
+/* =====================================================
+   FINISH
+===================================================== */
+
+function finish(
+    isSuccess,
+    frame
+){
+
+    if(!active) return;
+
+
+    active = false;
+
+    clearInterval(
+        frameTimer
+    );
+
+
+    if(isSuccess){
+
+        success++;
+
+    }else{
+
+        miss++;
+
+    }
+
+
+    results.push({
+
+        round:round,
+
+        type:getTypeName(),
+
+        success:isSuccess,
+
+        frame:Math.min(
+            frame,
+            deadline
+        )
+
+    });
+
+
+    const enemy =
+        document.getElementById("enemy");
+
+
+    enemy.className =
+        "fighter idle";
+
+
+    document.getElementById("message")
+        .textContent =
+        isSuccess
+        ? `SUCCESS!　${frame}F`
+        : `MISS...　${frame}F`;
+
+
+    setTimeout(
+        nextRound,
+        900
+    );
+
+}
+
+
+/* =====================================================
+   TYPE NAME
+===================================================== */
+
+function getTypeName(){
+
+    if(
+        currentType === "impact"
+    ){
+
+        return "インパクト";
+
+    }
+
+
+    if(
+        currentType === "antiAir"
+    ){
+
+        return "対空";
+
+    }
+
+
+    if(
+        currentType === "downAttack"
+    ){
+
+        return "下段";
+
+    }
+
+
+    if(
+        currentType === "feint"
+    ){
+
+        return "フェイント";
+
+    }
+
+}
+
+
+/* =====================================================
+   RESULT
+===================================================== */
+
+function showResult(){
+
+    document.getElementById("arena")
+        .style.display = "none";
+
+
+    document.getElementById("info")
+        .style.display = "none";
+
+
+    document.getElementById("controls")
+        .style.display = "none";
+
+
+    document.getElementById("keyboardInfo")
+        .style.display = "none";
+
+
+    document.getElementById("result")
+        .style.display = "block";
+
+
+    const rate =
+        Math.round(
+            success / 5 * 100
+        );
+
+
+    /*
+       成功した問題の
+       平均フレーム
+    */
+
+    const successfulFrames =
+        results
+        .filter(
+            r => r.success
+        )
+        .map(
+            r => r.frame
+        );
+
+
+    let average = "-";
+
+
+    if(
+        successfulFrames.length > 0
+    ){
+
+        average =
+            Math.round(
+                successfulFrames.reduce(
+                    (a,b) => a+b,
+                    0
+                ) /
+                successfulFrames.length
+            ) + "F";
+
+    }
+
+
+    document.getElementById(
+        "successCount"
+    ).textContent =
+        success;
+
+
+    document.getElementById(
+        "missCount"
+    ).textContent =
+        miss;
+
+
+    document.getElementById(
+        "successRate"
+    ).textContent =
+        rate + "%";
+
+
+    document.getElementById(
+        "averageFrame"
+    ).textContent =
+        average;
+
+
+    /*
+       詳細結果
+    */
+
+    const table =
+        document.getElementById(
+            "resultTable"
+        );
+
+
+    table.innerHTML = "";
+
+
+    results.forEach(
+        result => {
+
+            const tr =
+                document.createElement(
+                    "tr"
+                );
+
+
+            tr.innerHTML = `
+
+                <td>
+                    ${result.round}
+                </td>
+
+                <td>
+                    ${result.type}
+                </td>
+
+                <td class="${
+                    result.success
+                    ? "success"
+                    : "miss"
+                }">
+
+                    ${
+                        result.success
+                        ? "SUCCESS"
+                        : "MISS"
+                    }
+
+                </td>
+
+                <td>
+                    ${result.frame}F
+                </td>
+
+            `;
+
+
+            table.appendChild(tr);
+
+        }
+    );
+
+
+    /*
+       最終評価
+    */
+
+    let evaluation;
+
+
+    if(rate === 100){
+
+        evaluation =
+            "S　⚡ 神反応";
+
+    }
+
+    else if(rate >= 80){
+
+        evaluation =
+            "A　🥊 達人級";
+
+    }
+
+    else if(rate >= 60){
+
+        evaluation =
+            "B　🔥 かなり良い";
+
+    }
+
+    else if(rate >= 40){
+
+        evaluation =
+            "C　💪 あと一歩";
+
+    }
+
+    else{
+
+        evaluation =
+            "D　🥋 修行開始";
+
+    }
+
+
+    document.getElementById(
+        "evaluation"
+    ).textContent =
+        evaluation;
+
+}
+
 </script>
+
 </body>
 </html>
+```
